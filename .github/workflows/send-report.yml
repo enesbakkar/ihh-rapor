@@ -1,0 +1,54 @@
+name: İHH Haftalık Rapor Gönder
+
+on:
+  # Her Pazar 18:00 UTC = 21:00 İstanbul (UTC+3)
+  schedule:
+    - cron: '0 18 * * 0'
+  
+  # PWA'dan manuel tetikleme
+  repository_dispatch:
+    types: [send-report]
+
+  # GitHub UI'dan test için
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (formu gerçekten gönderme)'
+        required: false
+        default: 'false'
+
+jobs:
+  send-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install playwright google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client anthropic python-dotenv requests
+          playwright install chromium
+          playwright install-deps chromium
+
+      - name: Read payload
+        id: payload
+        run: |
+          # repository_dispatch'ten gelen payload'ı al
+          echo '${{ toJson(github.event.client_payload) }}' > /tmp/payload.json
+          cat /tmp/payload.json
+
+      - name: Run report script
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          PAYLOAD_FILE: /tmp/payload.json
+        run: python backend/send_report.py

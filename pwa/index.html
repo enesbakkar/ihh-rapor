@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ATOM Rapor" />
+  <meta name="theme-color" content="#1a472a" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  <title>İHH ATOM Rapor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green-deep: #0d2818;
+      --green-dark: #1a472a;
+      --green-mid: #2d6a4f;
+      --green-light: #52b788;
+      --green-pale: #95d5b2;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --cream: #f5f0e8;
+      --white: #ffffff;
+      --text-main: #f0ebe0;
+      --text-muted: #a0a890;
+      --border: rgba(200,168,76,0.25);
+      --card-bg: rgba(26,71,42,0.4);
+      --card-border: rgba(201,168,76,0.3);
+      --input-bg: rgba(13,40,24,0.8);
+      --danger: #e05c5c;
+      --success: #52b788;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+      background: var(--green-deep);
+      color: var(--text-main);
+      min-height: 100dvh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Background texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(45,106,79,0.3) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.1) 0%, transparent 50%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a84c' fill-opacity='0.03'%3E%3Cpath d='M30 30m-28 0a28 28 0 1 1 56 0a28 28 0 1 1-56 0'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .header {
+      padding: calc(var(--safe-top) + 16px) 20px 16px;
+      background: linear-gradient(180deg, rgba(13,40,24,0.95) 0%, transparent 100%);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--green-mid), var(--gold));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .logo-text {
+      font-family: 'Amiri', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold-light);
+      letter-spacing: 0.5px;
+    }
+
+    .week-badge {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 11px;
+      color: var(--gold-light);
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: 0.5px;
+    }
+
+    .header-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      padding: 8px 20px;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+
+    .tab {
+      flex-shrink: 0;
+      padding: 7px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      background: var(--green-mid);
+      border-color: var(--green-light);
+      color: var(--white);
+    }
+
+    /* ── Pages ── */
+    .page { display: none; flex: 1; padding: 0 20px; padding-bottom: calc(var(--safe-bottom) + 90px); }
+    .page.active { display: block; }
+
+    /* ── Section header ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--gold);
+      margin: 20px 0 10px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      margin-bottom: 10px;
+    }
+
+    /* ── Quick add button ── */
+    .quick-add-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+      border: 1px solid var(--green-light);
+      border-radius: var(--radius);
+      color: var(--white);
+      font-size: 15px;
+      font-weight: 600;
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+    .quick-add-btn:active { transform: scale(0.98); opacity: 0.9; }
+
+    /* ── Notes list ── */
+    .note-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      animation: slideIn 0.25s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .note-category {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .note-content { flex: 1; }
+    .note-text { font-size: 13px; line-height: 1.5; color: var(--text-main); }
+    .note-meta { font-size: 10px; color: var(--text-muted); margin-top: 3px; font-family: 'IBM Plex Mono', monospace; }
+
+    .note-delete {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      padding: 2px 4px;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+    .note-delete:active { opacity: 1; color: var(--danger); }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .emoji { font-size: 40px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; line-height: 1.6; }
+
+    /* ── Form fields ── */
+    .field-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .field-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .field-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+    }
+
+    .field-input, .field-select, .field-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      font-size: 14px;
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field-input:focus, .field-select:focus, .field-textarea:focus {
+      border-color: var(--green-light);
+    }
+
+    .field-select option { background: var(--green-deep); color: var(--text-main); }
+
+    .field-textarea { resize: none; min-height: 80px; line-height: 1.5; }
+
+    /* ── Category chips ── */
+    .category-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .chip {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .chip.selected {
+      color: var(--white);
+      border-color: transparent;
+    }
+    .chip[data-cat="icra"].selected { background: #2d6a8a; border-color: #5ab0d0; }
+    .chip[data-cat="sohbet"].selected { background: #6a2d7a; border-color: #b05ac0; }
+    .chip[data-cat="ziyaret"].selected { background: #6a4a2d; border-color: #c08050; }
+    .chip[data-cat="kuran"].selected { background: #2d6a4f; border-color: var(--green-light); }
+    .chip[data-cat="faaliyet"].selected { background: #6a2d2d; border-color: #c05050; }
+    .chip[data-cat="diger"].selected { background: #4a4a2d; border-color: #a0a050; }
+
+    /* ── Submit button ── */
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--gold), #b8860b);
+      border: none;
+      border-radius: var(--radius);
+      color: var(--green-deep);
+      font-size: 15px;
+      font-weight: 700;
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      margin-top: 4px;
+    }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Stats ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 28px;
+      font-weight: 500;
+      color: var(--gold-light);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── Preview ── */
+    .preview-field {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(200,168,76,0.1);
+      gap: 12px;
+    }
+    .preview-field:last-child { border-bottom: none; }
+    .preview-key { font-size: 11px; color: var(--text-muted); flex-shrink: 0; max-width: 140px; }
+    .preview-val { font-size: 13px; color: var(--text-main); text-align: right; line-height: 1.4; }
+
+    /* ── Bottom nav ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: rgba(13,40,24,0.95);
+      border-top: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      display: flex;
+      padding: 8px 0 calc(var(--safe-bottom) + 8px);
+      z-index: 200;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 6px 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+      transition: color 0.2s;
+    }
+    .nav-item.active { color: var(--gold-light); }
+    .nav-item .nav-icon { font-size: 22px; line-height: 1; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(13,40,24,0.85);
+      backdrop-filter: blur(8px);
+      z-index: 300;
+      display: flex;
+      align-items: flex-end;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--green-deep);
+      border: 1px solid var(--card-border);
+      border-radius: 24px 24px 0 0;
+      padding: 8px 20px calc(var(--safe-bottom) + 20px);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+
+    .modal-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 8px auto 16px;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--gold-light);
+      margin-bottom: 16px;
+      font-family: 'Amiri', serif;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      top: calc(var(--safe-top) + 70px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background: var(--green-mid);
+      border: 1px solid var(--green-light);
+      color: var(--white);
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 500;
+      opacity: 0;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: #6b2020; border-color: var(--danger); }
+
+    /* ── Archive ── */
+    .archive-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s;
+    }
+    .archive-item:active { border-color: var(--green-light); }
+    .archive-icon { font-size: 24px; }
+    .archive-info { flex: 1; }
+    .archive-title { font-size: 14px; font-weight: 500; color: var(--text-main); }
+    .archive-date { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-family: 'IBM Plex Mono', monospace; }
+    .archive-arrow { color: var(--text-muted); font-size: 16px; }
+
+    /* ── Info banner ── */
+    .info-banner {
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 12px;
+      color: var(--gold-light);
+      line-height: 1.6;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(13,40,24,0.3);
+      border-top-color: var(--green-deep);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-top">
+        <div class="logo-area">
+          <div class="logo-icon">🕌</div>
+          <div class="logo-text">ATOM Rapor</div>
+        </div>
+        <div class="week-badge" id="weekBadge">—. Hafta</div>
+      </div>
+      <div class="header-subtitle">İstanbul Genç İHH · Enes Bakkar</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('home')">📝 Notlar</button>
+      <button class="tab" onclick="switchTab('form')">📊 Sayılar</button>
+      <button class="tab" onclick="switchTab('preview')">👁️ Önizle</button>
+      <button class="tab" onclick="switchTab('archive')">📁 Arşiv</button>
+    </div>
+
+    <!-- PAGE: Notes -->
+    <div class="page active" id="page-home">
+      <button class="quick-add-btn" onclick="openModal()">
+        ➕ Anlık Not Ekle
+      </button>
+
+      <div id="sundayAlert" style="display:none;" class="info-banner">
+        🕐 Bugün Pazar! Rapor gönderim saati yaklaşıyor. Önizleme sekmesinden kontrol edin.
+      </div>
+
+      <div class="section-label">Bu Haftanın Notları</div>
+      <div id="notesList">
+        <div class="empty-state">
+          <div class="emoji">📋</div>
+          <p>Henüz not yok.<br/>Yukarıdaki butona basarak<br/>anlık not ekleyin.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: Form/Numbers -->
+    <div class="page" id="page-form">
+      <div class="section-label">Sabit Bilgiler</div>
+      <div class="card">
+        <div class="field-row">
+          <div class="field-group">
+            <div class="field-label">İsim Soyisim</div>
+            <div style="font-size:14px;color:var(--text-muted);padding:10px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;">Enes Bakkar</div>
+          </div>
+          <div class="field-group">
+            <div class="field-label">Birim</div>
+            <div style="font-size:14px;color:var(--text-muted);padding:10px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;">ATOM</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">Üye Sayıları</div>
+      <div class="card">
+        <div class="field-row">
+          <div class="field-group">
+            <div class="field-label">İcra Üyesi Sayısı</div>
+            <input type="number" class="field-input" id="f_icra_sayi" placeholder="11" min="0" />
+          </div>
+          <div class="field-group">
+            <div class="field-label">Komisyon Üyesi</div>
+            <input type="number" class="field-input" id="f_komisyon_sayi" placeholder="16" min="0" />
+          </div>
+        </div>
+        <div class="field-group" style="margin-top:10px;">
+          <div class="field-label">İlçe/Üniversite Karşılık Sayısı</div>
+          <input type="number" class="field-input" id="f_ilce_karsil" placeholder="8" min="0" />
+        </div>
+      </div>
+
+      <div class="section-label">Toplantı & Katılım</div>
+      <div class="card">
+        <div class="field-group" style="margin-bottom:12px;">
+          <div class="field-label">Haftalık İcra Toplantısı</div>
+          <select class="field-select" id="f_icra_toplanti">
+            <option value="Yüz yüze">Yüz yüze Yapıldı</option>
+            <option value="Çevirim içi">Online (Çevirim İçi) Yapıldı</option>
+            <option value="Yapılmadı">Yapılmadı</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <div class="field-label">İcra Katılım Sayısı</div>
+            <input type="number" class="field-input" id="f_icra_katilim" placeholder="0" min="0" />
+          </div>
+          <div class="field-group">
+            <div class="field-label">Sohbet Katılım Sayısı</div>
+            <input type="number" class="field-input" id="f_sohbet_katilim" placeholder="0" min="0" />
+          </div>
+        </div>
+        <div class="field-group" style="margin-top:12px;">
+          <div class="field-label">Kuran-ı Kerim Eğitimi (kişi sayısı)</div>
+          <input type="number" class="field-input" id="f_kuran" placeholder="0" min="0" />
+        </div>
+      </div>
+
+      <div class="section-label">Faaliyetler</div>
+      <div class="card">
+        <div class="field-group" style="margin-bottom:12px;">
+          <div class="field-label">Sosyal Faaliyet</div>
+          <select class="field-select" id="f_sosyal">
+            <option value="Yapılmadı">Yapılmadı</option>
+            <option value="custom">Yapıldı (açıkla →)</option>
+          </select>
+          <input type="text" class="field-input" id="f_sosyal_text" placeholder="Sosyal faaliyet açıklaması..." style="margin-top:8px;display:none;" />
+        </div>
+        <div class="field-group" style="margin-bottom:12px;">
+          <div class="field-label">Eğitim Çalışması</div>
+          <select class="field-select" id="f_egitim">
+            <option value="Yapılmadı">Yapılmadı</option>
+            <option value="custom">Yapıldı (açıkla →)</option>
+          </select>
+          <input type="text" class="field-input" id="f_egitim_text" placeholder="Eğitim çalışması açıklaması..." style="margin-top:8px;display:none;" />
+        </div>
+        <div class="field-group">
+          <div class="field-label">İlçe/Üniversite Ziyareti</div>
+          <input type="text" class="field-input" id="f_ziyaret" placeholder="Yapılmadı veya ilçe adları..." />
+        </div>
+      </div>
+
+      <div class="section-label">Planlama</div>
+      <div class="card">
+        <div class="field-group">
+          <div class="field-label">Gelecek Hafta Planları</div>
+          <textarea class="field-textarea" id="f_planlama" placeholder="Gelecek hafta yapılacaklar..." rows="4"></textarea>
+        </div>
+      </div>
+
+      <button class="submit-btn" onclick="saveForm()" style="background:linear-gradient(135deg,var(--green-mid),var(--green-dark));color:var(--white);">
+        💾 Kaydet
+      </button>
+    </div>
+
+    <!-- PAGE: Preview -->
+    <div class="page" id="page-preview">
+      <div class="info-banner" id="previewInfo">
+        ℹ️ Rapor önizlemesi. Kontrol edin, gerekirse notlar/sayılar sekmesinden düzeltin.
+      </div>
+
+      <div class="section-label">Rapor Özeti</div>
+      <div class="card" id="previewContent">
+        <div class="empty-state">
+          <div class="emoji">👁️</div>
+          <p>Önizleme oluşturulmadı.<br/>Notlar ve sayıları girdikten sonra<br/>"Raporu Hazırla" butonuna basın.</p>
+        </div>
+      </div>
+
+      <button class="quick-add-btn" onclick="generatePreview()" id="generateBtn" style="margin-top:0;">
+        🤖 Raporu AI ile Hazırla
+      </button>
+
+      <button class="submit-btn" onclick="sendReport()" id="sendBtn" disabled>
+        📤 İHH Formuna Gönder & Arşivle
+      </button>
+    </div>
+
+    <!-- PAGE: Archive -->
+    <div class="page" id="page-archive">
+      <div class="section-label">Gönderilmiş Raporlar</div>
+      <div id="archiveList">
+        <div class="empty-state">
+          <div class="emoji">📁</div>
+          <p>Henüz gönderilmiş rapor yok.<br/>Gönderilen raporlar burada<br/>görünecek.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('home')" id="nav-home">
+      <span class="nav-icon">📝</span>
+      <span>Notlar</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('form')" id="nav-form">
+      <span class="nav-icon">📊</span>
+      <span>Sayılar</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('preview')" id="nav-preview">
+      <span class="nav-icon">👁️</span>
+      <span>Önizle</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('archive')" id="nav-archive">
+      <span class="nav-icon">📁</span>
+      <span>Arşiv</span>
+    </button>
+  </nav>
+
+  <!-- Add Note Modal -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title">📌 Anlık Not Ekle</div>
+
+      <div class="section-label" style="margin-top:0;">Kategori</div>
+      <div class="category-chips">
+        <button class="chip selected" data-cat="icra" onclick="selectChip(this)">🏛️ İcra</button>
+        <button class="chip" data-cat="sohbet" onclick="selectChip(this)">💬 Sohbet</button>
+        <button class="chip" data-cat="ziyaret" onclick="selectChip(this)">🗺️ Ziyaret</button>
+        <button class="chip" data-cat="kuran" onclick="selectChip(this)">📖 Kuran</button>
+        <button class="chip" data-cat="faaliyet" onclick="selectChip(this)">⚡ Faaliyet</button>
+        <button class="chip" data-cat="diger" onclick="selectChip(this)">📋 Diğer</button>
+      </div>
+
+      <div class="field-group" style="margin-bottom:12px;">
+        <div class="field-label">Not</div>
+        <textarea class="field-textarea" id="noteText" placeholder="Örn: İcra toplantısı yapıldı, 8 kişi katıldı, yüz yüze..." rows="4" style="min-height:90px;"></textarea>
+      </div>
+
+      <button class="submit-btn" onclick="addNote()">
+        ➕ Not Ekle
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ── State ──
+    const STATE_KEY = 'ihh_atom_state';
+    let state = {
+      notes: [],
+      form: {},
+      reports: [],
+      lastGenerated: null,
+      generatedReport: null
+    };
+
+    // Load state
+    try {
+      const saved = localStorage.getItem(STATE_KEY);
+      if (saved) state = { ...state, ...JSON.parse(saved) };
+    } catch(e) {}
+
+    function saveState() {
+      try { localStorage.setItem(STATE_KEY, JSON.stringify(state)); } catch(e) {}
+    }
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', () => {
+      updateWeekBadge();
+      renderNotes();
+      renderArchive();
+      loadForm();
+      checkSunday();
+      registerSW();
+      setupSelectListeners();
+    });
+
+    function registerSW() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').then(reg => {
+          console.log('SW registered');
+          scheduleSundayReminder();
+        });
+      }
+    }
+
+    function scheduleSundayReminder() {
+      // Check every hour if it's Sunday 20:45 and schedule notification
+      setInterval(() => {
+        const now = new Date();
+        if (now.getDay() === 0 && now.getHours() === 20 && now.getMinutes() >= 45 && now.getMinutes() < 50) {
+          if (Notification.permission === 'granted') {
+            new Notification('📋 İHH ATOM Haftalık Rapor', {
+              body: 'Pazar 21:00\'a 15 dakika kaldı! Raporu hazırlayın.',
+              icon: '/icon-192.png'
+            });
+          }
+        }
+      }, 60000);
+
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+
+    function checkSunday() {
+      const now = new Date();
+      if (now.getDay() === 0) {
+        document.getElementById('sundayAlert').style.display = 'flex';
+      }
+    }
+
+    function updateWeekBadge() {
+      const now = new Date();
+      const dayOfWeek = now.getDay();
+      const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() + daysToMonday);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+
+      const fmt = d => `${String(d.getDate()).padStart(2,'0')}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getFullYear()).slice(-2)}`;
+      document.getElementById('weekBadge').textContent = `${fmt(monday)}-${fmt(sunday)}`;
+    }
+
+    function setupSelectListeners() {
+      document.getElementById('f_sosyal').addEventListener('change', function() {
+        document.getElementById('f_sosyal_text').style.display = this.value === 'custom' ? 'block' : 'none';
+      });
+      document.getElementById('f_egitim').addEventListener('change', function() {
+        document.getElementById('f_egitim_text').style.display = this.value === 'custom' ? 'block' : 'none';
+      });
+    }
+
+    // ── Tabs ──
+    function switchTab(tab) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+      document.getElementById('page-' + tab).classList.add('active');
+      document.getElementById('nav-' + tab).classList.add('active');
+
+      const tabBtns = document.querySelectorAll('.tab');
+      const tabMap = { home: 0, form: 1, preview: 2, archive: 3 };
+      if (tabMap[tab] !== undefined) tabBtns[tabMap[tab]].classList.add('active');
+
+      if (tab === 'archive') renderArchive();
+    }
+
+    // ── Modal ──
+    let selectedCat = 'icra';
+
+    function openModal() {
+      document.getElementById('modalOverlay').classList.add('open');
+      document.getElementById('noteText').focus();
+    }
+
+    function closeModal(e) {
+      if (e.target === document.getElementById('modalOverlay') || !e) {
+        document.getElementById('modalOverlay').classList.remove('open');
+        document.getElementById('noteText').value = '';
+      }
+    }
+
+    function selectChip(el) {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedCat = el.dataset.cat;
+    }
+
+    // ── Notes ──
+    const catLabels = {
+      icra: { label: 'İcra', emoji: '🏛️', color: '#2d6a8a' },
+      sohbet: { label: 'Sohbet', emoji: '💬', color: '#6a2d7a' },
+      ziyaret: { label: 'Ziyaret', emoji: '🗺️', color: '#6a4a2d' },
+      kuran: { label: 'Kuran', emoji: '📖', color: '#2d6a4f' },
+      faaliyet: { label: 'Faaliyet', emoji: '⚡', color: '#6a2d2d' },
+      diger: { label: 'Diğer', emoji: '📋', color: '#4a4a4a' }
+    };
+
+    function addNote() {
+      const text = document.getElementById('noteText').value.trim();
+      if (!text) { showToast('Lütfen bir şeyler yazın!', true); return; }
+
+      const note = {
+        id: Date.now(),
+        cat: selectedCat,
+        text,
+        time: new Date().toLocaleString('tr-TR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })
+      };
+
+      state.notes.unshift(note);
+      saveState();
+      renderNotes();
+      document.getElementById('modalOverlay').classList.remove('open');
+      document.getElementById('noteText').value = '';
+      showToast('Not eklendi ✓');
+    }
+
+    function deleteNote(id) {
+      state.notes = state.notes.filter(n => n.id !== id);
+      saveState();
+      renderNotes();
+    }
+
+    function renderNotes() {
+      const list = document.getElementById('notesList');
+      if (!state.notes.length) {
+        list.innerHTML = `<div class="empty-state"><div class="emoji">📋</div><p>Henüz not yok.<br/>Yukarıdaki butona basarak<br/>anlık not ekleyin.</p></div>`;
+        return;
+      }
+
+      list.innerHTML = state.notes.map(n => {
+        const cat = catLabels[n.cat] || catLabels.diger;
+        return `
+          <div class="note-item">
+            <div class="note-category" style="background:${cat.color}20;border:1px solid ${cat.color}40;">${cat.emoji}</div>
+            <div class="note-content">
+              <div class="note-text">${escHtml(n.text)}</div>
+              <div class="note-meta">${cat.label} · ${n.time}</div>
+            </div>
+            <button class="note-delete" onclick="deleteNote(${n.id})">✕</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ── Form ──
+    function loadForm() {
+      const f = state.form;
+      if (f.icra_sayi) document.getElementById('f_icra_sayi').value = f.icra_sayi;
+      if (f.komisyon_sayi) document.getElementById('f_komisyon_sayi').value = f.komisyon_sayi;
+      if (f.ilce_karsil) document.getElementById('f_ilce_karsil').value = f.ilce_karsil;
+      if (f.icra_toplanti) document.getElementById('f_icra_toplanti').value = f.icra_toplanti;
+      if (f.icra_katilim) document.getElementById('f_icra_katilim').value = f.icra_katilim;
+      if (f.sohbet_katilim) document.getElementById('f_sohbet_katilim').value = f.sohbet_katilim;
+      if (f.kuran) document.getElementById('f_kuran').value = f.kuran;
+      if (f.ziyaret) document.getElementById('f_ziyaret').value = f.ziyaret;
+      if (f.planlama) document.getElementById('f_planlama').value = f.planlama;
+
+      if (f.sosyal && f.sosyal !== 'Yapılmadı') {
+        document.getElementById('f_sosyal').value = 'custom';
+        document.getElementById('f_sosyal_text').style.display = 'block';
+        document.getElementById('f_sosyal_text').value = f.sosyal;
+      }
+      if (f.egitim && f.egitim !== 'Yapılmadı') {
+        document.getElementById('f_egitim').value = 'custom';
+        document.getElementById('f_egitim_text').style.display = 'block';
+        document.getElementById('f_egitim_text').value = f.egitim;
+      }
+    }
+
+    function saveForm() {
+      const sosyal_sel = document.getElementById('f_sosyal').value;
+      const egitim_sel = document.getElementById('f_egitim').value;
+
+      state.form = {
+        icra_sayi: document.getElementById('f_icra_sayi').value,
+        komisyon_sayi: document.getElementById('f_komisyon_sayi').value,
+        ilce_karsil: document.getElementById('f_ilce_karsil').value,
+        icra_toplanti: document.getElementById('f_icra_toplanti').value,
+        icra_katilim: document.getElementById('f_icra_katilim').value,
+        sohbet_katilim: document.getElementById('f_sohbet_katilim').value,
+        kuran: document.getElementById('f_kuran').value,
+        ziyaret: document.getElementById('f_ziyaret').value || 'Yapılmadı',
+        planlama: document.getElementById('f_planlama').value,
+        sosyal: sosyal_sel === 'custom' ? document.getElementById('f_sosyal_text').value : 'Yapılmadı',
+        egitim: egitim_sel === 'custom' ? document.getElementById('f_egitim_text').value : 'Yapılmadı',
+      };
+      saveState();
+      showToast('Kaydedildi ✓');
+    }
+
+    // ── Generate Preview ──
+    async function generatePreview() {
+      saveForm();
+      const btn = document.getElementById('generateBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> AI rapor hazırlıyor...';
+
+      const notesText = state.notes.map(n => `[${catLabels[n.cat]?.label || n.cat}] ${n.text}`).join('\n');
+      const f = state.form;
+
+      try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 1000,
+            system: `Sen İstanbul Genç İHH ATOM biriminin haftalık rapor asistanısın. Kullanıcının anlık notlarını, resmi ve profesyonel bir haftalık rapor metnine dönüştürüyorsun. Türkçe yaz. Resmi ama sıcak bir dil kullan. Madde madde, düzgün cümleler kur. Her faaliyeti aktif fiil ile anlat (gerçekleştirildi, sağlandı, tamamlandı, icra edildi vb.). Sadece "Hafta İçerisindeki Çalışmalar" bölümünü yaz, başka bir şey ekleme. JSON formatında döndür: {"calisma_metni": "..."}`,
+            messages: [{
+              role: 'user',
+              content: `Aşağıdaki anlık notlardan bu haftanın çalışma özetini yaz:\n\n${notesText || 'Not girilmemiş.'}\n\nEk bilgiler: İcra toplantısı: ${f.icra_toplanti || '-'}, İcra katılım: ${f.icra_katilim || 0}, Sohbet katılım: ${f.sohbet_katilim || 0}, Ziyaret: ${f.ziyaret || 'Yapılmadı'}`
+            }]
+          })
+        });
+
+        const data = await response.json();
+        const text = data.content?.[0]?.text || '{}';
+        const clean = text.replace(/```json|```/g, '').trim();
+        const parsed = JSON.parse(clean);
+
+        state.generatedReport = parsed.calisma_metni;
+        state.lastGenerated = new Date().toISOString();
+        saveState();
+        renderPreview();
+        document.getElementById('sendBtn').disabled = false;
+        showToast('Rapor hazırlandı ✓');
+      } catch(e) {
+        showToast('Hata: ' + e.message, true);
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '🤖 Raporu Yeniden Hazırla';
+    }
+
+    function renderPreview() {
+      const f = state.form;
+      const content = document.getElementById('previewContent');
+
+      const fields = [
+        ['İsim Soyisim', 'Enes Bakkar'],
+        ['Birim', 'ATOM'],
+        ['İcra Üyesi Sayısı', f.icra_sayi || '-'],
+        ['Komisyon Üyesi Sayısı', f.komisyon_sayi || '-'],
+        ['İlçe/Üniv. Karşılık', f.ilce_karsil || '-'],
+        ['Haftalık İcra', f.icra_toplanti || '-'],
+        ['İcra Katılım', f.icra_katilim || '0'],
+        ['Sohbet Katılım', f.sohbet_katilim || '0'],
+        ['Sosyal Faaliyet', f.sosyal || 'Yapılmadı'],
+        ['Eğitim Çalışması', f.egitim || 'Yapılmadı'],
+        ['İlçe/Üniv. Ziyareti', f.ziyaret || 'Yapılmadı'],
+        ['Kuran Eğitimi', f.kuran || '0'],
+        ['Bu Haftanın Çalışmaları', state.generatedReport || '(Henüz oluşturulmadı)'],
+        ['Stajyer Çalışmaları', 'Yok'],
+        ['Gelecek Hafta Planları', f.planlama || '-'],
+      ];
+
+      content.innerHTML = fields.map(([k, v]) => `
+        <div class="preview-field">
+          <div class="preview-key">${k}</div>
+          <div class="preview-val">${escHtml(String(v))}</div>
+        </div>
+      `).join('');
+    }
+
+    // ── Send Report ──
+    async function sendReport() {
+      const btn = document.getElementById('sendBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner" style="border-top-color:var(--green-deep)"></div> Gönderiliyor...';
+
+      try {
+        // Call backend GitHub Actions trigger
+        const weekLabel = document.getElementById('weekBadge').textContent;
+        const f = state.form;
+
+        const payload = {
+          isim: 'Enes Bakkar',
+          birim: 'ATOM',
+          icra_sayi: f.icra_sayi || '',
+          komisyon_sayi: f.komisyon_sayi || '',
+          ilce_karsil: f.ilce_karsil || '',
+          icra_toplanti: f.icra_toplanti || 'Yapılmadı',
+          icra_katilim: f.icra_katilim || '0',
+          sohbet_katilim: f.sohbet_katilim || '0',
+          sosyal: f.sosyal || 'Yapılmadı',
+          egitim: f.egitim || 'Yapılmadı',
+          ziyaret: f.ziyaret || 'Yapılmadı',
+          kuran: f.kuran || '0',
+          calisma: state.generatedReport || '',
+          stajyer: 'Yok',
+          planlama: f.planlama || '',
+          week_label: weekLabel
+        };
+
+        // Trigger GitHub Actions
+        const ghResponse = await fetch(
+          'https://api.github.com/repos/enesbakkar/ihh-rapor/dispatches',
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': 'token GITHUB_PAT_PLACEHOLDER',
+              'Content-Type': 'application/json',
+              'Accept': 'application/vnd.github.v3+json'
+            },
+            body: JSON.stringify({
+              event_type: 'send-report',
+              client_payload: payload
+            })
+          }
+        );
+
+        if (ghResponse.ok || ghResponse.status === 204) {
+          // Save to local archive
+          state.reports.unshift({
+            id: Date.now(),
+            week: weekLabel,
+            date: new Date().toLocaleDateString('tr-TR'),
+            summary: (state.generatedReport || '').substring(0, 80) + '...',
+            data: { ...f, calisma: state.generatedReport }
+          });
+
+          // Clear this week's notes
+          state.notes = [];
+          state.generatedReport = null;
+          state.form = {};
+          saveState();
+
+          renderNotes();
+          renderArchive();
+          showToast('✅ Rapor gönderildi ve arşivlendi!');
+          switchTab('archive');
+        } else {
+          throw new Error('GitHub Actions tetiklenemedi: ' + ghResponse.status);
+        }
+      } catch(e) {
+        showToast('Hata: ' + e.message, true);
+        btn.disabled = false;
+        btn.innerHTML = '📤 İHH Formuna Gönder & Arşivle';
+      }
+    }
+
+    // ── Archive ──
+    function renderArchive() {
+      const list = document.getElementById('archiveList');
+      if (!state.reports.length) {
+        list.innerHTML = `<div class="empty-state"><div class="emoji">📁</div><p>Henüz gönderilmiş rapor yok.<br/>Gönderilen raporlar burada<br/>görünecek.</p></div>`;
+        return;
+      }
+      list.innerHTML = state.reports.map(r => `
+        <div class="archive-item">
+          <div class="archive-icon">📄</div>
+          <div class="archive-info">
+            <div class="archive-title">${r.week || 'Haftalık Rapor'}</div>
+            <div class="archive-date">${r.date} · Gönderildi</div>
+          </div>
+          <div class="archive-arrow">›</div>
+        </div>
+      `).join('');
+    }
+
+    // ── Helpers ──
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast' + (isError ? ' error' : '');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function escHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    }
+  </script>
+</body>
+</html>
