@@ -1,4 +1,4 @@
-name: İHH Haftalık Rapor Gönder
+name: IHH Haftalik Rapor Gonder
 
 on:
   # Her Pazar 18:00 UTC = 21:00 İstanbul (UTC+3)
